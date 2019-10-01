@@ -5,6 +5,7 @@ import './App.css'
 
 import Card from './components/Card'
 import Pagination from './components/Pagination'
+import UserInput from './components/UserInput'
 
 class App extends React.Component {
     state = {
@@ -27,6 +28,15 @@ class App extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         console.log('componentDidUpdate')
+        if (this.state.userName !== prevState.userName) {
+            axios.get(`https://api.github.com/users/${this.state.userName}`)
+                .then(resp => {
+                    this.setState({
+                        userData: resp.data
+                    })
+                })
+                .catch(console.error)
+        }
         // if different user, get followers
         if (this.state.userData.followers_url && (!prevState.userData.followers_url || prevState.userData.followers_url !== this.state.userData.followers_url)) {
             console.log('new user')
@@ -74,6 +84,12 @@ class App extends React.Component {
         }
     }
 
+    submitHandler = (userName) => {
+        this.setState({
+            userName
+        })
+    }
+
     pageHandler = (pageNumber) => {
         if (0 < pageNumber <= Math.ceil(this.state.userFollowers.length/2)) {
             this.setState({
@@ -85,6 +101,7 @@ class App extends React.Component {
     render() {
         return (
             <div className="App">
+                <UserInput handler={this.submitHandler} />
                 <Card {...this.state.userData} />
                 <h4>Followers:</h4>
                 {this.state.userFollowersData.map(follower => <Card key={follower.id} {...follower} />)}
