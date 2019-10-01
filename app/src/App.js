@@ -4,6 +4,7 @@ import 'materialize-css/dist/css/materialize.min.css'
 import './App.css'
 
 import Card from './components/Card'
+import Pagination from './components/Pagination'
 
 class App extends React.Component {
     state = {
@@ -41,7 +42,7 @@ class App extends React.Component {
                     this.setState({
                         userFollowers: resp.data.map(e => e.login)
                     })
-                    this.state.userFollowers.slice(0,3).forEach(follower => {
+                    this.state.userFollowers.slice(0,2).forEach(follower => {
                         // get follower's data
                         axios.get(`https://api.github.com/users/${follower}`)
                             .then(resp => {
@@ -56,7 +57,28 @@ class App extends React.Component {
         }
         else if (this.state.page !== prevState.page && this.state.userFollowers[0] && this.state.userFollowersData[0]) {
             console.log('new page')
-            // do stuff
+            // clear old page data
+            this.setState({
+                userFollowersData: [],
+            })
+            this.state.userFollowers.slice(2 * (this.state.page-1), 2 * this.state.page).forEach(follower => {
+                // get follower's data
+                axios.get(`https://api.github.com/users/${follower}`)
+                    .then(resp => {
+                        this.setState({
+                            userFollowersData: [...this.state.userFollowersData, resp.data]
+                        })
+                    })
+                    .catch(console.error)
+                })
+        }
+    }
+
+    pageHandler = (pageNumber) => {
+        if (0 < pageNumber <= Math.ceil(this.state.userFollowers.length/2)) {
+            this.setState({
+                page: pageNumber
+            })
         }
     }
 
@@ -66,6 +88,7 @@ class App extends React.Component {
                 <Card {...this.state.userData} />
                 <h4>Followers:</h4>
                 {this.state.userFollowersData.map(follower => <Card key={follower.id} {...follower} />)}
+                <Pagination page={this.state.page} pages={Math.ceil(this.state.userFollowers.length/2)} handler={this.pageHandler} />
             </div>
         );
     }
