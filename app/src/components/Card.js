@@ -7,7 +7,7 @@ function Card(props) {
             <h3>{props.name || props.login}</h3>
             <p>{props.login}</p>
             <p>Location: {props.location || 'N.A.'}</p>
-            <p>Profile:  
+            <p>Profile:&nbsp;
                 <a href={props.html_url}>{props.html_url}</a>
             </p>
             <p>Followers: {props.followers}</p>
